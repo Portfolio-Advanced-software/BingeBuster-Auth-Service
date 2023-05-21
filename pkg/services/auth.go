@@ -12,6 +12,7 @@ import (
 )
 
 type Server struct {
+	pb.UnimplementedAuthServiceServer
 	DB  *mongo.Collection
 	Jwt utils.JwtWrapper
 }
@@ -96,6 +97,6 @@ func (s *Server) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.Val
 
 	return &pb.ValidateResponse{
 		Status: http.StatusOK,
-		UserId: user.Id,
+		UserId: user.Id.Hex(),
 	}, nil
 }
