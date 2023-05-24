@@ -11,7 +11,7 @@ COPY . /go/src/app
 RUN go get -d -v ./...
 
 # Build the Go app
-RUN go build -o app
+RUN go build -o app ./cmd
 
 # Expose port 50051 for the application
 EXPOSE 50051
