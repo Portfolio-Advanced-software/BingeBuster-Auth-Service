@@ -13,6 +13,10 @@ RUN go get -d -v ./...
 # Build the Go app
 RUN go build -o app ./cmd
 
+# Create a non-root user and switch to that user
+RUN adduser -D auth-service
+USER auth-service
+
 # Expose port 50051 for the application
 EXPOSE 50051
 
