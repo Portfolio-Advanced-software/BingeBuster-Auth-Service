@@ -3,9 +3,15 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	Port         string `mapstructure:"PORT"`
-	DBUrl        string `mapstructure:"DB_URL"`
-	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
+	Port              string `mapstructure:"PORT"`
+	MongoDBUser       string `mapstructure:"MONGODB_USER"`
+	MongoDBPwd        string `mapstructure:"MONGODB_PWD"`
+	MongoDBCluster    string `mapstructure:"MONGODB_CLUSTER"`
+	MongoDBDb         string `mapstructure:"MONGODB_DB"`
+	MongoDBCollection string `mapstructure:"MONGODB_COLLECTION"`
+	RabbitMQUser      string `mapstructure:"RABBITMQ_USER"`
+	RabbitMQPwd       string `mapstructure:"RABBITMQ_PWD"`
+	JWTSecretKey      string `mapstructure:"JWT_SECRET_KEY"`
 }
 
 func LoadConfig() (config Config, err error) {

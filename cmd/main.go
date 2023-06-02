@@ -19,9 +19,6 @@ var db *mongo.Client
 var authdb *mongo.Collection
 var mongoCtx context.Context
 
-var dbName = "AuthService"
-var collectionName = "Users"
-
 func main() {
 	c, err := config.LoadConfig()
 
@@ -43,12 +40,15 @@ func main() {
 
 	fmt.Println("Auth Svc on", c.Port)
 
+	// Construct the RabbitMQ URL
+	mongodbURL := fmt.Sprintf("mongodb+srv://%s:%s@%s", c.MongoDBUser, c.MongoDBPwd, c.MongoDBCluster)
+
 	// Initialize MongoDb client
 	fmt.Println("Connecting to MongoDB...")
-	db = mongodb.ConnectToMongoDB(c.DBUrl)
+	db = mongodb.ConnectToMongoDB(mongodbURL)
 
 	// Bind our collection to our global variable for use in other methods
-	authdb = db.Database(dbName).Collection(collectionName)
+	authdb = db.Database(c.MongoDBDb).Collection(c.MongoDBCollection)
 
 	s := services.Server{
 		DB:  authdb,
