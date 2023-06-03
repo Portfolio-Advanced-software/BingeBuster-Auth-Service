@@ -2,12 +2,16 @@ package services
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
+	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/globals"
+	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/messaging"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/models"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/pb"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -30,12 +34,32 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 
 	user.Email = req.Email
 	user.Password = utils.HashPassword(req.Password)
-	user.Role = "user"
 
-	_, err = s.DB.InsertOne(ctx, user)
+	result, err := s.DB.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve the inserted user ID
+	insertedUserID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, errors.New("failed to retrieve inserted user ID")
+	}
+
+	// Send a message to the authorizations service to save user id with standard role
+	message := map[string]interface{}{
+		"user_id": insertedUserID.Hex(),
+		"role":    "user",
+		"action":  "saveRecord",
+	}
+
+	conn, err := messaging.ConnectToRabbitMQ(globals.RabbitMQUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	queueName := "authz_queue"
+	messaging.ProduceMessage(conn, message, queueName)
 
 	return &pb.RegisterResponse{
 		Status: http.StatusCreated,

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/config"
 	mongodb "github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/db"
+	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/globals"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/pb"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/services"
 	"github.com/Portfolio-Advanced-software/BingeBuster-Auth-Service/pkg/utils"
@@ -49,6 +50,8 @@ func main() {
 
 	// Bind our collection to our global variable for use in other methods
 	authdb = db.Database(c.MongoDBDb).Collection(c.MongoDBCollection)
+
+	globals.RabbitMQUrl = fmt.Sprintf("amqps://%s:%s@rattlesnake.rmq.cloudamqp.com/%s", c.RabbitMQUser, c.RabbitMQPwd, c.RabbitMQUser)
 
 	s := services.Server{
 		DB:  authdb,
