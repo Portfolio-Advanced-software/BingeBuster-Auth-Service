@@ -46,20 +46,32 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 		return nil, errors.New("failed to retrieve inserted user ID")
 	}
 
-	// Send a message to the authorizations service to save user id with standard role
-	message := map[string]interface{}{
-		"user_id": insertedUserID.Hex(),
-		"role":    "user",
-		"action":  "saveRecord",
-	}
-
 	conn, err := messaging.ConnectToRabbitMQ(globals.RabbitMQUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	queueName := "authz_queue"
-	messaging.ProduceMessage(conn, message, queueName)
+	userQueue := "user_queue"
+
+	// Send a message to the user service to add user
+	newUser := map[string]interface{}{
+		"user_id": insertedUserID.Hex(),
+		"email":   req.Email,
+		"action":  "saveRecord",
+	}
+
+	messaging.ProduceMessage(conn, newUser, userQueue)
+
+	authzQueue := "authz_queue"
+
+	// Send a message to the authorizations service to save user id with standard role
+	newAuthz := map[string]interface{}{
+		"user_id": insertedUserID.Hex(),
+		"role":    "user",
+		"action":  "saveRecord",
+	}
+
+	messaging.ProduceMessage(conn, newAuthz, authzQueue)
 
 	return &pb.RegisterResponse{
 		Status: http.StatusCreated,

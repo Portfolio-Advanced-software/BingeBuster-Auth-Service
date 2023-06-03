@@ -7,9 +7,11 @@ import (
 )
 
 var (
-	Db          *mongo.Client
-	UserDb      *mongo.Collection
-	MongoCtx    context.Context
-	MongoDBUrl  string
-	RabbitMQUrl string
+	Db             *mongo.Client
+	AuthDb         *mongo.Collection
+	MongoCtx       context.Context
+	MongoDBUrl     string
+	DbName         string
+	CollectionName string
+	RabbitMQUrl    string
 )
