@@ -30,6 +30,7 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 
 	user.Email = req.Email
 	user.Password = utils.HashPassword(req.Password)
+	user.Role = "user"
 
 	_, err = s.DB.InsertOne(ctx, user)
 	if err != nil {
