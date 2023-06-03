@@ -27,6 +27,11 @@ func HandleMessage(body []byte) error {
 	}
 
 	switch msg.Action {
+	case "getAllRecords":
+		err := mongodb.GetAllUserData(context.Background(), msg.UserId, SendMessage)
+		if err != nil {
+			log.Println("Failed to get all records:", err)
+		}
 	case "deleteAllRecords":
 		_, err := mongodb.DeleteAuthByID(context.Background(), msg.UserId)
 		if err != nil {
@@ -46,6 +51,16 @@ func HandleMessage(body []byte) error {
 	default:
 		fmt.Println("Unknown action:", msg.Action)
 	}
+
+	return nil
+}
+
+func SendMessage(data string) error {
+	conn, err := ConnectToRabbitMQ(globals.RabbitMQUrl)
+	if err != nil {
+		log.Fatalf("Can't connect to RabbitMQ: %s", err)
+	}
+	ProduceMessage(conn, data, "user_data")
 
 	return nil
 }
